@@ -15,15 +15,7 @@ class products extends Model
         $validator = new Validation();
 
         // Robot name must be unique
-        $validator->add(
-            'name',
-            new Uniqueness(
-                [
-                    'field'   => 'name',
-                    'message' => 'The product name must be unique',
-                ]
-            )
-        );
+        
 
         $validator->add(
             'image', 

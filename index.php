@@ -128,21 +128,44 @@ $app->get(
 $app->post(
     '/api/products',
     function () use ($app) {
-        $product = $app->request->getJsonRawBody();
+        $product = file_get_contents('php://input');
+        //$product = $app->request->getJsonRawBody(file_get_contents('php://input'));
+        //$product = json_decode($input);
+        //$product = $this->objectToArray($this->request->getJsonRawBody());
 
-        if(is_null($product)){
-            echo "nai";
-        }
-        
+        //echo $input;
+        echo $product;
+
         $phql = 'INSERT INTO Store\Toys\products (name, manual, price, image) VALUES (:name:, :manual:, :price:, :image:)';
-        
+
+        //がんばってSQL文を変換
+        $product = str_replace('"', '', $product);
+        $product = str_replace("'", '', $product);
+        $product = str_replace(':', '', $product);
+        $product = str_replace('{', '', $product);
+        $product = str_replace('}', '', $product);
+
+        var_dump($product);
+
+        $product_array = explode(',',$product);
+
+        $id = str_replace('id', '', $product_array[0]);
+        $name = str_replace('name', '', $product_array[1]);
+        $manual = str_replace('manual', '', $product_array[2]);
+        $price = str_replace('price', '', $product_array[3]);
+        $image = str_replace('image', '', $product_array[4]);
+
+        //$test = $app->modelsManager->executeQuery($phql);
+        //echo $test;
+
         $status = $app->modelsManager->executeQuery(
             $phql,
             [
-                'name' => $product->name,
-                'manual' => $product->manual,
-                'price' => $product->price,
-                'image' => $product->image,
+                'id' => $id,
+                'name' => $name,
+                'manual' => $manual,
+                'price' => $price,
+                'image' => $image,
             ]
         );
 
@@ -154,7 +177,7 @@ $app->post(
             // Change the HTTP status
             $response->setStatusCode(201, "Created");
 
-            $product->id = $status->getModel()->id;
+            $id = $status->getModel()->id;
 
             $response->setJsonContent(
                 [
@@ -189,18 +212,33 @@ $app->post(
 $app->put(
     "/api/products/{id:[0-9]+}",
     function ($id) use ($app) {
-        $product = $app->request->getJsonRawBody();
+        $product = file_get_contents('php://input');
 
-        $phql = "UPDATE Store\Toys\products SET name = :name:, manual = :manual:, price = :price: WHERE id = :id:";
+        $phql = "UPDATE Store\Toys\products SET name = :name:, manual = :manual:, price = :price:, image = :image: WHERE id = :id:";
+
+        $product = str_replace('"', '', $product);
+        $product = str_replace("'", '', $product);
+        $product = str_replace(':', '', $product);
+        $product = str_replace('{', '', $product);
+        $product = str_replace('}', '', $product);
+
+        var_dump($product);
+
+        $product_array = explode(',',$product);
+
+        $name = str_replace('name', '', $product_array[0]);
+        $manual = str_replace('manual', '', $product_array[1]);
+        $price = str_replace('price', '', $product_array[2]);
+        $image = str_replace('image', '', $product_array[3]);
 
         $status = $app->modelsManager->executeQuery(
             $phql,
             [
                 "id"   => $id,
-                "name" => $product->name,
-                "manual" => $product->manual,
-                "price" => $product->price,
-                "image" => $product->image
+                "name" => $name,
+                "manual" => $manual,
+                "price" => $price,
+                "image" => $image,
             ]
         );
 
